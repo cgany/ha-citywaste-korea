@@ -32,7 +32,7 @@ async def async_setup_entry(
 ) -> None:
     """Set up CityWaste Korea sensors from a config entry."""
 
-    data = {**entry.data, **entry.options}
+    data = entry.data | entry.options
 
     coordinator = CityWasteCoordinator(hass, entry)
     await coordinator.async_config_entry_first_refresh()
@@ -43,12 +43,10 @@ async def async_setup_entry(
     )
 
     async_add_entities(
-        CityWasteSensor(
-            coordinator,
-            entry,
-            condition,
-        )
-        for condition in conditions
+        [
+            CityWasteSensor(coordinator, entry, condition)
+            for condition in conditions
+        ]
     )
 
 
@@ -58,10 +56,10 @@ class CityWasteSensor(CoordinatorEntity, SensorEntity):
     _attr_has_entity_name = True
 
     def __init__(
-    self,
-    coordinator: CityWasteCoordinator,
-    entry: ConfigEntry,
-    condition: str,
+        self,
+        coordinator: CityWasteCoordinator,
+        entry: ConfigEntry,
+        condition: str,
     ) -> None:
         super().__init__(coordinator)
         self._entry = entry
@@ -87,11 +85,12 @@ class CityWasteSensor(CoordinatorEntity, SensorEntity):
             identifiers={(DOMAIN, self._entry.entry_id)},
             name=self._entry.title,
             manufacturer="CityWaste Korea",
+            model="Apartment Waste Schedule",
             configuration_url="https://www.citywaste.or.kr/portal/status/selectSimpleEmissionQuantity.do",
         )
 
     @property
-    def native_value(self):
+    def native_value(self) -> Any:
         """Return the state of the sensor."""
         value = self.coordinator.data.get(self._condition)
         if isinstance(value, float):
