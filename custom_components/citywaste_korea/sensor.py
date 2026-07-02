@@ -1,12 +1,14 @@
 """Support for getting statistical data from CityWaste Korea."""
-from .coordinator import CityWasteCoordinator
+
 from __future__ import annotations
 
-from datetime import timedelta
-import logging
 from typing import Any
 
-from homeassistant.components.sensor import SensorEntity, SensorDeviceClass, SensorStateClass
+from homeassistant.components.sensor import (
+    SensorDeviceClass,
+    SensorEntity,
+    SensorStateClass,
+)
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import UnitOfMass
 from homeassistant.core import HomeAssistant
@@ -16,17 +18,11 @@ from homeassistant.helpers.update_coordinator import CoordinatorEntity
 
 from .coordinator import CityWasteCoordinator
 from .const import (
-    CONF_APTDONG,
-    CONF_APTHONO,
     CONF_MONITORED_CONDITIONS,
-    CONF_TAGPRINTCD,
     DEFAULT_MONITORED_CONDITIONS,
     DOMAIN,
     MONITORED_CONDITIONS,
 )
-
-_LOGGER = logging.getLogger(__name__)
-
 
 
 async def async_setup_entry(
@@ -62,10 +58,10 @@ class CityWasteSensor(CoordinatorEntity, SensorEntity):
     _attr_has_entity_name = True
 
     def __init__(
-        self,
-        coordinator: DataUpdateCoordinator[dict[str, Any]],
-        entry: ConfigEntry,
-        condition: str,
+    self,
+    coordinator: CityWasteCoordinator,
+    entry: ConfigEntry,
+    condition: str,
     ) -> None:
         super().__init__(coordinator)
         self._entry = entry
