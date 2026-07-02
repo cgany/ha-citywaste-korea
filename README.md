@@ -1,5 +1,5 @@
-# CityWaste-Korea-for-Home-Assistant
-🏠 Home Assistant CityWaste Korea
+# 🏠 Home Assistant CityWaste Korea
+
 
 한국 아파트 분리수거 일정 통합
 
