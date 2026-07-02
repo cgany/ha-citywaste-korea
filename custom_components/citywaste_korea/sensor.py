@@ -1,5 +1,5 @@
 """Support for getting statistical data from CityWaste Korea."""
-
+from .coordinator import CityWasteCoordinator
 from __future__ import annotations
 
 from datetime import timedelta
@@ -12,13 +12,9 @@ from homeassistant.const import UnitOfMass
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity import DeviceInfo
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
-from homeassistant.helpers.update_coordinator import (
-    CoordinatorEntity,
-    DataUpdateCoordinator,
-    UpdateFailed,
-)
+from homeassistant.helpers.update_coordinator import CoordinatorEntity
 
-from .citywaste_api import CityWasteApiError, CityWasteClient
+from .coordinator import CityWasteCoordinator
 from .const import (
     CONF_APTDONG,
     CONF_APTHONO,
@@ -31,7 +27,6 @@ from .const import (
 
 _LOGGER = logging.getLogger(__name__)
 
-SCAN_INTERVAL = timedelta(minutes=30)
 
 
 async def async_setup_entry(
@@ -40,32 +35,24 @@ async def async_setup_entry(
     async_add_entities: AddEntitiesCallback,
 ) -> None:
     """Set up CityWaste Korea sensors from a config entry."""
-    data = dict(entry.data)
-    data.update(dict(entry.options))
 
-    client = CityWasteClient(
-        data[CONF_TAGPRINTCD], int(data[CONF_APTDONG]), int(data[CONF_APTHONO])
-    )
+    data = {**entry.data, **entry.options}
 
-    async def async_update_data() -> dict[str, Any]:
-        try:
-            return await hass.async_add_executor_job(client.fetch_month_data)
-        except CityWasteApiError as err:
-            raise UpdateFailed(str(err)) from err
-
-    coordinator = DataUpdateCoordinator(
-        hass,
-        _LOGGER,
-        name=f"{DOMAIN}_{entry.entry_id}",
-        update_method=async_update_data,
-        update_interval=SCAN_INTERVAL,
-    )
-
+    coordinator = CityWasteCoordinator(hass, entry)
     await coordinator.async_config_entry_first_refresh()
 
-    conditions = data.get(CONF_MONITORED_CONDITIONS) or DEFAULT_MONITORED_CONDITIONS
+    conditions = (
+        data.get(CONF_MONITORED_CONDITIONS)
+        or DEFAULT_MONITORED_CONDITIONS
+    )
+
     async_add_entities(
-        CityWasteSensor(coordinator, entry, condition) for condition in conditions
+        CityWasteSensor(
+            coordinator,
+            entry,
+            condition,
+        )
+        for condition in conditions
     )
 
 
