@@ -1,6 +1,6 @@
 """Constants for the CityWaste Korea integration."""
 
-DOMAIN = "citywaste_korea"
+DOMAIN = "citywaste_korea_hacs"
 
 CONF_TAGPRINTCD = "tagprintcd"
 CONF_APTDONG = "aptdong"
