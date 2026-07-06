@@ -32,10 +32,9 @@ async def async_setup_entry(
 ) -> None:
     """Set up CityWaste Korea sensors from a config entry."""
 
-    data = entry.data | entry.options
+    coordinator: CityWasteCoordinator = hass.data[DOMAIN][entry.entry_id]
 
-    coordinator = CityWasteCoordinator(hass, entry)
-    await coordinator.async_config_entry_first_refresh()
+    data = {**entry.data, **entry.options}
 
     conditions = (
         data.get(CONF_MONITORED_CONDITIONS)
